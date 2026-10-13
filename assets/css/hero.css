@@ -1,0 +1,287 @@
+/* ============================================================
+ *  hero.css — #welcome 首屏 HERO（移植自 discord-hero/index.html）
+ *
+ *  与宿主站的隔离约定：
+ *   - 所有规则以 .hero 作用域前缀，避免与站内同名类互染
+ *     （关键冲突项：.btn / .dot / .pil 之外的 .btn--ghost、h1 等）
+ *   - #fx / .cursor / .ripple 是 HERO 独有元素，保持原命名（宿主无同类名）
+ *   - 本站亮暗主题切换不影响 HERO：它是刻意保持深色的品牌首屏
+ *   - HERO 是章节流的第一屏（app.js §7），整屏高度由 .scroller__inner
+ *     高度链 + min-height:100% 决定（见 style.css 的章节流布局）
+ * ============================================================ */
+
+/* ============================================================
+ *  HERO 骨架
+ * ============================================================ */
+.hero {
+  --p: 0;                 /* 滚动进度 0→1（严格线性 = 实际滚动量），驱动分层退场位移 */
+  --pe: 0;                /* 缓动后的进度（smoothstep，两端导数 0），驱动一切淡入淡出与缩放：
+                             线性进度在两端导数不为 0，进出会有一帧拐点；缓动后进出都没有硬边。
+                             两者都由 hero.js 写入。 */
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  position: relative;
+  flex: 0 0 auto;
+  /* 整屏第一屏：高度恒等于视口。沉浸态下 Discord 外壳让位，
+     消息区即视口，HERO 因此真正全屏；内容更高时 min-height 允许随内容撑开 */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(48px, 8.5vh, 96px) clamp(18px, 5vw, 40px) clamp(64px, 10vh, 92px);
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(120% 90% at 50% 8%, #171a26 0%, #0b0d13 55%, #07080d 100%);
+}
+
+/* 舞台层：所有视觉层（光晕 / 网格 / 噪点 / 内容 / 粒子）都装在这里，
+   --sy/--ss 由 hero.js 随滚动写入，整层一起位移缩放。
+   padding: inherit —— 绝对定位元素的包含块是 .hero 的「内边距盒」，
+   若舞台不继承同一圈 padding，居中内容会相对原位置下沉半个 padding 差。 */
+.hero .hero__stage {
+  position: absolute;
+  inset: 0;
+  padding: inherit;
+  display: grid;
+  place-items: center;
+  transform-origin: 50% 46%;
+  transform: translate3d(0, var(--sy, 0px), 0) scale(var(--ss, 1));
+  will-change: transform;
+}
+
+/* 三层光晕（原两层模糊合成开销大；径向渐变本身足够柔，单层 54px 观感不变） */
+.hero .glow { position: absolute; inset: -25%; z-index: 0; filter: blur(54px); pointer-events: none;
+  opacity: calc(.9 - var(--pe, 0) * .32); transform: translate3d(0, 0, 0); }
+.hero .glow i { position: absolute; border-radius: 50%; mix-blend-mode: screen; will-change: transform; }
+.hero .glow i:nth-child(1) { width: 52vw; height: 52vw; left: 8%; top: 6%;
+  background: radial-gradient(circle at 50% 50%, rgba(88,101,242,.85), rgba(88,101,242,.18) 55%, transparent 70%);
+  animation: hDrift1 19s ease-in-out -5s infinite alternate; }
+.hero .glow i:nth-child(2) { width: 44vw; height: 44vw; right: 4%; top: 22%;
+  background: radial-gradient(circle at 50% 50%, rgba(0,168,252,.6), rgba(0,168,252,.12) 55%, transparent 70%);
+  animation: hDrift2 22s ease-in-out -13s infinite alternate; }
+.hero .glow i:nth-child(3) { width: 40vw; height: 40vw; left: 30%; bottom: -6%;
+  background: radial-gradient(circle at 50% 50%, rgba(235,69,158,.55), rgba(235,69,158,.1) 55%, transparent 70%);
+  animation: hDrift3 21s ease-in-out -9s infinite alternate; }
+@keyframes hDrift1 { from { transform: translate3d(0,0,0) scale(1) } to { transform: translate3d(6%,8%,0) scale(1.18) } }
+@keyframes hDrift2 { from { transform: translate3d(0,0,0) scale(1.1) } to { transform: translate3d(-8%,10%,0) scale(.95) } }
+@keyframes hDrift3 { from { transform: translate3d(0,0,0) scale(.95) } to { transform: translate3d(7%,-9%,0) scale(1.15) } }
+
+/* 网格与压暗层：上下各留 80px 余量，视差把图层下移时不露空边 */
+.hero .hero__grid { position: absolute; left: 0; right: 0; top: -80px; bottom: -80px; z-index: 1; pointer-events: none;
+  opacity: calc(.5 - var(--pe, 0) * .34);
+  background-image: linear-gradient(to right, rgba(255,255,255,.045) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(80% 60% at 50% 40%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(80% 60% at 50% 40%, #000 30%, transparent 100%); }
+.hero .hero__veil { position: absolute; left: 0; right: 0; top: -60px; bottom: -60px; z-index: 1; pointer-events: none;
+  background: radial-gradient(100% 70% at 50% 100%, rgba(0,0,0,.55), transparent 60%),
+              radial-gradient(130% 95% at 50% 45%, transparent 42%, rgba(0,0,0,.32) 100%); }
+/* 噪点：大面积深色渐变在 8-bit 屏上必出带状色阶，一层 SVG 噪点即可压掉 */
+.hero .hero__grain { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: .055; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px; }
+
+/* 渐暗层：过场时整幕沉下去（含粒子），首屏不是「淡出」而是「被压暗 + 盖住」。
+   纯 opacity 合成，不动布局也不掉帧；z-index 高于粒子画布，压住全部内容 */
+.hero .hero__dim { position: absolute; inset: 0; z-index: 7; pointer-events: none;
+  background: #05060a; opacity: calc(var(--pe, 0) * 0.62); }
+
+/* 粒子画布：原为全屏 fixed，整合后挂在 HERO 内部（overflow:hidden 裁剪），坐标随之改局部系 */
+.hero #fx { position: absolute; inset: 0; z-index: 6; pointer-events: none;
+  will-change: transform; transform: translateZ(0); }
+
+/* ============================================================
+ *  HERO 内容
+ * ============================================================ */
+/* --py/--ps 由滚动写入，--rx/--ry 由指针写入：两条线各自改变量，不互相覆盖 transform */
+.hero .hero__inner { position: relative; z-index: 3; width: 100%; max-width: 940px; text-align: center; will-change: transform, opacity;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+             translate3d(0, var(--py, 0px), 0) scale(var(--ps, 1)); }
+/* 分层退场：标题先走、副标题与 CTA 稍后、板块最慢，形成镜头推进 */
+.hero h1 { transform: translate3d(0, calc(var(--p) * -28px), 0); }
+.hero .sub { transform: translate3d(0, calc(var(--p) * -15px), 0); }
+.hero .cta { transform: translate3d(0, calc(var(--p) * -8px), 0); }
+.hero .boards { transform: translate3d(0, calc(var(--p) * -5px), 0); }
+
+.hero .pill { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px;
+  background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  font-size: 13px; font-weight: 600; color: #b5bac1; }
+.hero .pill b { color: #f2f3f5; font-weight: 700; }
+.hero .dot { width: 8px; height: 8px; border-radius: 50%; background: #23a55a; box-shadow: 0 0 0 4px rgba(35,165,90,.18);
+  animation: hPulse 2.4s ease-in-out infinite; }
+@keyframes hPulse { 0%,100% { opacity: 1; transform: scale(1) } 50% { opacity: .55; transform: scale(.85) } }
+
+.hero h1 { margin: 22px 0 0; font-size: clamp(38px, 7vw, 74px); line-height: 1.06; font-weight: 800; letter-spacing: -.03em;
+  background: linear-gradient(180deg, #ffffff 25%, #c9cdfb 75%, #8b93ff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 24px 60px rgba(88,101,242,.28); }
+.hero .hero__role { margin: 14px 0 0; font-size: clamp(14px, 2vw, 18px); font-weight: 700; color: #9aa2ff; letter-spacing: .01em; }
+.hero .sub { margin: 16px auto 0; max-width: 660px; font-size: clamp(14.5px, 1.95vw, 17.5px); color: #b5bac1;
+  line-height: 1.85; letter-spacing: .005em; }
+.hero .cta { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+
+/* --mx/--my 由磁吸写入，--lift/--sc 由 hover/active 写入：合成到一条 transform，不互相打断 */
+.hero .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  height: 52px; padding: 0 26px; border-radius: 12px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+  transform: translate3d(var(--mx, 0px), calc(var(--my, 0px) + var(--lift, 0px)), 0) scale(var(--sc, 1));
+  transition: transform .22s var(--ease), box-shadow .22s var(--ease), background-color .22s var(--ease), border-color .22s var(--ease); }
+.hero .btn svg, .hero .btn span { position: relative; z-index: 2; }
+.hero .btn--primary { background: linear-gradient(180deg, #6e77f7, #4854e8); color: #fff;
+  box-shadow: 0 12px 34px rgba(88,101,242,.42), inset 0 1px 0 rgba(255,255,255,.22); }
+.hero .btn--primary::after { content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.32) 50%, transparent 75%);
+  transform: translateX(-120%); transition: transform .6s var(--ease); }
+.hero .btn--primary:hover { --lift: -3px; box-shadow: 0 18px 44px rgba(88,101,242,.55), inset 0 1px 0 rgba(255,255,255,.28); }
+.hero .btn--primary:hover::after { transform: translateX(120%); }
+.hero .btn--primary:active { --lift: -1px; --sc: .99; }
+.hero .btn--ghost { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: #f2f3f5; }
+.hero .btn--ghost:hover { --lift: -3px; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.24); }
+.hero .btn--ghost:active { --lift: -1px; --sc: .99; }
+/* 主 CTA 呼吸光晕：静止时首屏唯一的持续动效，避免 CTA 只有 hover 才"活" */
+.hero .btn--primary { animation: hCtaBreathe 4.6s ease-in-out infinite; }
+@keyframes hCtaBreathe {
+  0%,100% { filter: drop-shadow(0 6px 16px rgba(88,101,242,.24)) }
+  50% { filter: drop-shadow(0 8px 28px rgba(88,101,242,.58)) } }
+/* 玻璃光源跟随：指针坐标写入 --gx/--gy，"玻璃"才有光源 */
+.hero .pill::after, .hero .btn--ghost::after, .hero .board::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit;
+  pointer-events: none; opacity: 0; transition: opacity .25s var(--ease);
+  background: radial-gradient(150px circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.14), transparent 68%); }
+.hero .pill:hover::after, .hero .btn--ghost:hover::after, .hero .board:hover::after { opacity: 1; }
+
+/* 板块导航（6 个板块 + 搜索），图标与侧栏频道一一对应，保持导航语言一致。
+   弹性宽度：宿主消息区比独立页窄（侧栏占用 ~560px），固定 124px 会把 7 枚
+   折成两行、首屏放不下；弹性下限 96px 保证常见宽度下仍是一行 7 枚的原构图 */
+.hero .boards { margin: 52px auto 0; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-width: 1040px; }
+.hero .board { position: relative; flex: 1 1 100px; min-width: 96px; max-width: 132px; padding: 18px 6px 14px; border-radius: 18px; display: grid; place-items: center; gap: 10px; text-align: center;
+  background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  color: #b5bac1;
+  transition: transform .25s var(--ease), background-color .25s var(--ease), border-color .25s var(--ease),
+              box-shadow .25s var(--ease), color .25s var(--ease); }
+.hero .board svg { width: 30px; height: 30px; transition: transform .25s var(--ease), color .25s var(--ease), filter .25s var(--ease); }
+.hero .board small { font-size: 12.5px; font-weight: 600; }
+.hero .board em { font-style: normal; font-size: 11px; color: #8b8f98; letter-spacing: .06em; }
+.hero .board:hover { transform: translateY(-8px);
+  background: linear-gradient(180deg, rgba(88,101,242,.26), rgba(88,101,242,.08));
+  border-color: rgba(138,146,255,.55); box-shadow: 0 18px 40px rgba(88,101,242,.28); color: #fff; }
+.hero .board:hover svg { transform: translateY(-2px) scale(1.08); color: #fff; filter: drop-shadow(0 4px 12px rgba(138,146,255,.6)); }
+.hero .board--search:hover { background: linear-gradient(180deg, rgba(0,168,252,.24), rgba(0,168,252,.06));
+  border-color: rgba(0,168,252,.5); box-shadow: 0 18px 40px rgba(0,168,252,.24); }
+.hero .boards__hint { margin: 16px auto 0; text-align: center; font-size: 12.5px; color: #8b8f98; }
+
+.hero .cue { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 4; display: grid; justify-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; color: #8b8f98; letter-spacing: .06em; transition: color .2s var(--ease), opacity .3s linear; }
+.hero .cue:hover { color: #f2f3f5; text-decoration: none; }
+.hero .cue svg { animation: hBob 2.2s ease-in-out infinite; }
+@keyframes hBob { 0%,100% { transform: translateY(0); opacity: .7 } 50% { transform: translateY(6px); opacity: 1 } }
+.hero .cue.is-hidden { opacity: 0; pointer-events: none; }
+
+.hero .rise { opacity: 0; transform: translateY(22px); animation: hRise .85s var(--ease) forwards; }
+@keyframes hRise { to { opacity: 1; transform: none } }
+.hero .d1 { animation-delay: .05s } .hero .d2 { animation-delay: .18s } .hero .d3 { animation-delay: .30s }
+.hero .d4 { animation-delay: .42s } .hero .d5 { animation-delay: .55s } .hero .d6 { animation-delay: .68s }
+
+/* ============================================================
+ *  指针层：自定义光标 / 触控涟漪（body 级固定元素，HERO 挂载时启用）
+ * ============================================================ */
+/* 双色描边环：半圈品牌色 + 半圈白，缓慢自转。
+   环画在 ::before 上而不是本体上 —— 本体的 transform 被 JS 用来做跟随定位，
+   若把 rotate 动画放在本体，会整块覆盖掉定位用的 translate，指针会跳到左上角。 */
+.cursor { position: fixed; top: 0; left: 0; width: 13px; height: 13px; background: transparent;
+  pointer-events: none; z-index: 90; opacity: 0;
+  transition: opacity .18s linear, width .22s cubic-bezier(.2,.7,.3,1), height .22s cubic-bezier(.2,.7,.3,1); }
+.cursor::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.92);
+  border-top-color: #9aa2ff; border-right-color: #9aa2ff;   /* 上+右 = 半圈品牌色 */
+  box-shadow: 0 0 0 1px rgba(0,0,0,.28);
+  animation: curSpin 5.5s linear infinite; }
+@keyframes curSpin { to { transform: rotate(360deg) } }
+.cursor::after { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: 2px; margin: -1px 0 0 -1px;
+  border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.3); }
+.cursor.is-on { opacity: 1; }
+.cursor.is-hot { width: 20px; height: 20px; }
+.cursor.is-hot::before { box-shadow: 0 0 0 1px rgba(0,0,0,.28), inset 0 0 0 4px rgba(154,162,255,.18); }
+.cursor.is-down { width: 9px; height: 9px; }
+.cursor.is-down::before { animation-duration: 1.8s; }   /* 按下时转快一点，当作"蓄力"反馈 */
+html.has-cursor .hero, html.has-cursor .hero * { cursor: none; }
+
+/* 触控涟漪（移动端指针反馈） */
+.ripple { position: fixed; z-index: 75; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%;
+  border: 2px solid rgba(154,162,255,.5); pointer-events: none; animation: rippleOut .62s cubic-bezier(.2,.7,.3,1) forwards; }
+@keyframes rippleOut { from { transform: scale(.4); opacity: .9 } to { transform: scale(4.4); opacity: 0 } }
+
+/* ============================================================
+ *  响应式（与 discord-hero 一致；容器宽度 = 消息区宽度）
+ *  注：宿主顶栏 + 输入区占掉约 140px 高度，矮视口断点按宿主实况
+ *  重新标定（原独立页的 820 / 700 上移为 980 / 860）
+ * ============================================================ */
+/* 矮视口（13" 笔记本等）：收紧纵向节奏，保证滚动提示不落到首屏之外 */
+@media (max-height: 980px) and (min-width: 561px) {
+  .hero { padding-top: clamp(36px, 6vh, 64px); padding-bottom: 70px; }
+  .hero h1 { font-size: clamp(34px, 5.6vw, 58px); }
+  .hero .sub { margin-top: 12px; line-height: 1.7; }
+  .hero .cta { margin-top: 26px; }
+  .hero .boards { margin-top: 34px; }
+}
+/* 更矮（视口 ≈600–700px）：整体再压一档，首屏尽量完整 */
+@media (max-height: 860px) and (min-width: 561px) {
+  .hero { padding-top: clamp(28px, 5vh, 48px); padding-bottom: 58px; }
+  .hero h1 { font-size: clamp(30px, 4.6vw, 46px); letter-spacing: -.02em; }
+  .hero .hero__role { margin-top: 10px; font-size: 14.5px; }
+  .hero .sub { margin-top: 10px; line-height: 1.55; font-size: 14px; }
+  .hero .cta { margin-top: 20px; }
+  .hero .btn { height: 46px; padding: 0 22px; font-size: 15px; }
+  .hero .boards { margin-top: 26px; gap: 10px; }
+  .hero .board { padding: 12px 6px 10px; }
+  .hero .board svg { width: 24px; height: 24px; }
+  .hero .boards__hint { margin-top: 10px; }
+  .hero .cue { bottom: 12px; }
+}
+@media (max-width: 860px) {
+  .hero { padding-left: clamp(14px, 4vw, 28px); padding-right: clamp(14px, 4vw, 28px); }
+}
+@media (max-width: 560px) {
+  .hero { padding: 40px 16px 72px; }
+  .hero .boards { gap: 8px; margin-top: 38px; }
+  .hero .board { flex: 0 0 auto; width: calc((100% - 16px) / 3); min-width: 0; max-width: none; padding: 14px 6px 10px; }
+  .hero .board svg { width: 26px; height: 26px; }
+  .hero .board small { font-size: 11.5px; }
+  .hero .btn { height: 48px; padding: 0 20px; font-size: 15px; }
+}
+/* 手机竖屏（窄且矮）：首屏必须恰好一屏。
+   .hero 的高度是 min-height:100dvh——内容一旦更高就会把首屏撑破，
+   滚动时第二屏（作品集）便不是从整屏边界开始，"全屏"承诺落空。
+   因此这一档主动把内容压矮：板块 7 枚由三行收成两行（英文小字隐去），
+   字号与留白各收一档。实测 360×780 / 390×844 均完整落入一屏。 */
+@media (max-width: 560px) and (max-height: 900px) {
+  .hero { padding: 32px 14px 56px; }
+  .hero h1 { margin-top: 14px; font-size: clamp(28px, 7.4vw, 40px); }
+  .hero .hero__role { margin-top: 8px; font-size: 13.5px; }
+  .hero .sub { margin-top: 10px; font-size: 13.5px; line-height: 1.6; }
+  .hero .cta { margin-top: 20px; gap: 10px; }
+  .hero .btn { height: 44px; padding: 0 16px; font-size: 14.5px; }
+  .hero .boards { margin-top: 22px; gap: 7px; }
+  .hero .board { width: calc((100% - 21px) / 4); padding: 10px 4px 8px; gap: 6px; }
+  .hero .board svg { width: 22px; height: 22px; }
+  .hero .board small { font-size: 11px; }
+  .hero .board em { display: none; }
+  .hero .boards__hint { margin-top: 10px; font-size: 11.5px; }
+  .hero .cue { bottom: 10px; }
+}
+
+/* ============================================================
+ *  降低动效偏好（宿主已有全局版；此处补 HERO 专属项）
+ * ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .hero .glow i, .hero .cue svg, .hero .dot, .hero .btn--primary { animation: none !important; }
+  .cursor { display: none !important; }
+  .hero .rise { opacity: 1 !important; transform: none !important; }
+  .hero .btn--primary::after { display: none; }
+}
+
+/* 打印：HERO 深色大图不打印，只输出下方的速览文案 */
+@media print {
+  .hero { display: none !important; }
+}

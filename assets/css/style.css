@@ -1,0 +1,1202 @@
+/* ============================================================
+ *  style.css — 视觉主基调：Discord
+ *  亮色 / 暗色双主题：html[data-theme="dark" | "light"]
+ * ============================================================ */
+
+/* ---------------- 主题变量 ---------------- */
+:root {
+  /* 暗色（默认，Discord Dark） */
+  --rail: #1e1f22;
+  --sidebar: #2b2d31;
+  --chat: #313338;
+  --chat-alt: #383a40;
+  --elevated: #313338;
+  --input: #383a40;
+  --hover: rgba(78, 80, 88, 0.3);
+  --hover-strong: rgba(78, 80, 88, 0.48);
+  --active: rgba(78, 80, 88, 0.6);
+  --border: rgba(255, 255, 255, 0.06);
+  --divider: #3f4147;
+
+  --text: #dbdee1;
+  --text-strong: #f2f3f5;
+  --text-muted: #949ba4;
+  --text-faint: #80848e;
+  --text-link: #00a8fc;
+
+  --brand: #5865f2;
+  --brand-hover: #4752c4;
+  --brand-soft: rgba(88, 101, 242, 0.16);
+  --brand-text: #c9cdfb;
+
+  --green: #23a55a;
+  --yellow: #f0b232;
+  --red: #f23f43;
+  --pink: #eb459e;
+  --cyan: #00a8fc;
+
+  --embed-bg: #2b2d31;
+  --code-bg: #2b2d31;
+  --code-text: #b5bac1;
+  --mention-bg: rgba(88, 101, 242, 0.18);
+  --mention-text: #dee0fc;
+  --shadow-low: 0 1px 0 rgba(4, 4, 5, 0.2), 0 1.5px 0 rgba(6, 6, 7, 0.05), 0 2px 0 rgba(4, 4, 5, 0.05);
+  --shadow-high: 0 8px 16px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --scrollbar-thumb: #1a1b1e;
+  --scrollbar-track: #2b2d31;
+  --avatar-ring: #313338;
+
+  /* ---------------- 运动令牌（全站动效统一口径，改这里即可统一手感）----------------
+     曲线：
+       --ease-out  出场/收缩用：起步快、收尾慢，à la 「被拉走后顺势停住」
+       --ease-io   状态切换用：两端对称，进出都不突兀
+       --ease-crv  甩动 entry 用（轻微过冲，仅限 pointer-driven 微交互）
+     时长：micro 微反馈（hover/按压）→ small 面板类 → shell 外壳开合（唯一会触发重排的动画，
+       因此刻意取三者中最短的可读值，0.44s 以内人眼已认定为「跟手」） */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-io: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-crv: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --t-micro: 0.16s;
+  --t-small: 0.24s;
+  --t-base: 0.32s;
+  --t-shell: 0.44s;
+}
+
+html[data-theme="light"] {
+  /* 亮色（Discord Light） */
+  --rail: #e3e5e8;
+  --sidebar: #f2f3f5;
+  --chat: #ffffff;
+  --chat-alt: #f2f3f5;
+  --elevated: #ffffff;
+  --input: #ebedef;
+  --hover: rgba(6, 6, 7, 0.04);
+  --hover-strong: rgba(6, 6, 7, 0.07);
+  --active: rgba(6, 6, 7, 0.1);
+  --border: rgba(6, 6, 7, 0.08);
+  --divider: #dcdee1;
+
+  --text: #2e3338;
+  --text-strong: #060607;
+  --text-muted: #5c5e66;
+  --text-faint: #80848e;
+  --text-link: #006ce7;
+
+  --brand-soft: rgba(88, 101, 242, 0.12);
+  --brand-text: #4752c4;
+
+  --embed-bg: #f2f3f5;
+  --code-bg: #f2f3f5;
+  --code-text: #4e5058;
+  --mention-bg: rgba(88, 101, 242, 0.12);
+  --mention-text: #4752c4;
+  --shadow-low: 0 1px 0 rgba(4, 4, 5, 0.08);
+  --shadow-high: 0 8px 16px rgba(6, 6, 7, 0.12), 0 0 0 1px rgba(6, 6, 7, 0.06);
+  --scrollbar-thumb: #c4c9ce;
+  --scrollbar-track: #e3e5e8;
+  --avatar-ring: #ffffff;
+}
+
+/* ---------------- 基础重置 ---------------- */
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "gg sans", "Noto Sans", Inter, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--chat);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.375;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  transition: background-color 0.18s var(--ease-out), color 0.18s var(--ease-out);
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: var(--text-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul { margin: 0; padding: 0; list-style: none; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 4px; }
+
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------------- 应用骨架 ---------------- */
+.app {
+  display: grid;
+  grid-template-columns: 72px 240px minmax(0, 1fr) 248px;
+  /* 行高必须显式约束为容器高度：否则隐式 auto 行会被内容撑高，
+     而 .app 是 overflow:hidden——消息区一旦超出一屏就整体被裁剪、
+     连滚动条都不出现（长频道在较小窗口下的存量缺陷，2026-10-12 修复） */
+  grid-template-rows: minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  /* 沉浸态进出时列宽平滑收放（首屏 ↔ 履历区）；.is-layout-snap 供
+     导航切换使用——先瞬时完成布局再起飞，保证落点精确（见 app.js §7.7）
+     动效口径：一切都走 --t-shell + --ease-out —— 同一条曲线、同一个时长，
+     外壳才会像一个整体被推走 / 拉回；旧版顶栏与输入区是瞬时塌陷（只有列宽
+     在动），那一帧的位移会被眼睛认成「硬跳」。 */
+  transition: grid-template-columns var(--t-shell) var(--ease-out);
+}
+/* 导航切换（go / 深链 / 回复按钮）用的瞬时档：外壳所有过渡一并关掉，
+   先把布局切到位再起飞，落点才精确（见 app.js §7.7 syncImmersiveForSection）。
+   自然滚动跨界不加这个类，列宽收放保留 0.56s 动画，形成「外壳开合」。 */
+.app.is-layout-snap,
+.app.is-layout-snap .topbar,
+.app.is-layout-snap .composer,
+.app.is-layout-snap .rail,
+.app.is-layout-snap .sidebar,
+.app.is-layout-snap .members { transition: none; }
+
+/* ============ 左侧服务器栏 ============ */
+.rail {
+  background: var(--rail);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 16px;
+  gap: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  transition: background-color 0.18s var(--ease-out), opacity 0.42s var(--ease-out);
+}
+.rail::-webkit-scrollbar { display: none; }
+
+.rail__item {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  background: var(--chat-alt);
+  transition: border-radius 0.16s var(--ease-out), background-color 0.16s var(--ease-out), color 0.16s var(--ease-out);
+  flex: 0 0 auto;
+}
+.rail__item:hover, .rail__item.is-active {
+  border-radius: 14px;
+  background: var(--brand);
+  color: #fff;
+}
+.rail__item::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 8px;
+  border-radius: 0 4px 4px 0;
+  background: var(--text-strong);
+  opacity: 0;
+  transition: height 0.16s var(--ease-out), opacity 0.16s var(--ease-out);
+}
+.rail__item:hover::before { opacity: 1; height: 20px; }
+.rail__item.is-active::before { opacity: 1; height: 40px; }
+
+.rail__pill {
+  position: absolute;
+  left: 62px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.96);
+  background: #111214;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s var(--ease-out), transform 0.12s var(--ease-out);
+  z-index: 60;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.rail__item:hover .rail__pill { opacity: 1; transform: translateY(-50%) scale(1); }
+
+.rail__sep { width: 32px; height: 2px; border-radius: 1px; background: var(--hover-strong); margin: 4px 0; flex: 0 0 auto; }
+.rail__spacer { flex: 1 1 auto; min-height: 8px; }
+
+.rail__avatar { padding: 0; overflow: hidden; background: transparent; border-radius: 50%; }
+.rail__avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.rail__avatar:hover, .rail__avatar.is-active { border-radius: 50%; background: transparent; }
+
+.rail__dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 4px solid var(--rail);
+}
+
+/* ============ 频道栏 ============ */
+.sidebar {
+  background: var(--sidebar);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  transition: background-color 0.18s var(--ease-out), opacity 0.42s var(--ease-out);
+}
+
+.sidebar__header {
+  height: 48px;
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 16px;
+  box-shadow: var(--shadow-low);
+  cursor: pointer;
+  position: relative;
+  z-index: 5;
+}
+.sidebar__header:hover { background: var(--hover); }
+.sidebar__brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sidebar__brand strong {
+  font-size: 15px;
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar__chev { color: var(--text-muted); flex: 0 0 auto; }
+
+.sidebar__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 8px 8px;
+}
+
+.cat { margin-bottom: 16px; }
+.cat__title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.cat__title:hover { color: var(--text-strong); }
+
+.channel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 2px;
+}
+.channel:hover { background: var(--hover); color: var(--text); }
+.channel.is-active { background: var(--active); color: var(--text-strong); }
+.channel__hash { flex: 0 0 auto; opacity: 0.75; }
+.channel__label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.channel__badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--red);
+  border-radius: 8px;
+  padding: 1px 6px;
+  flex: 0 0 auto;
+}
+
+/* 侧栏底部用户面板 */
+.userpanel {
+  flex: 0 0 auto;
+  height: 52px;
+  background: var(--rail);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+html[data-theme="light"] .userpanel { background: #ebedef; }
+.userpanel__avatar { position: relative; width: 32px; height: 32px; flex: 0 0 auto; }
+.userpanel__avatar img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.userpanel__meta { min-width: 0; flex: 1 1 auto; line-height: 1.15; }
+.userpanel__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.userpanel__sub { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.userpanel__actions { display: flex; gap: 2px; flex: 0 0 auto; }
+
+.iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  transition: background-color 0.12s var(--ease-out), color 0.12s var(--ease-out);
+}
+.iconbtn:hover { background: var(--hover-strong); color: var(--text-strong); }
+.iconbtn.is-on { color: var(--brand-text); }
+
+/* 语言切换按钮 */
+.langbtn {
+  height: 26px;
+  min-width: 40px;
+  padding: 0 10px;
+  border-radius: 13px;
+  background: var(--chat-alt);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.12s var(--ease-out), color 0.12s var(--ease-out);
+}
+.langbtn:hover { background: var(--brand); color: #fff; }
+.rail__langtext {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* ============ 主区域 ============ */
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--chat); transition: background-color 0.18s var(--ease-out); }
+
+.topbar {
+  height: 48px;
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  box-shadow: var(--shadow-low);
+  position: relative;
+  z-index: 20;
+  /* 顶栏有确定高度（48px / flex-basis 48px），所以空间可以真正被「推带」走：
+     空间与透明度同曲线同时长，消退得比列宽快半拍（内容先走、框再收） */
+  transition: height var(--t-shell) var(--ease-out),
+              flex-basis var(--t-shell) var(--ease-out),
+              opacity calc(var(--t-shell) * 0.55) var(--ease-out),
+              box-shadow var(--t-shell) var(--ease-out);
+}
+.topbar__hash { color: var(--text-faint); display: grid; place-items: center; flex: 0 0 auto; }
+.topbar__title { font-size: 15px; font-weight: 700; color: var(--text-strong); flex: 0 0 auto; }
+.topbar__divider { width: 1px; height: 24px; background: var(--divider); margin: 0 8px; flex: 0 0 auto; }
+.topbar__topic {
+  font-size: 14px;
+  color: var(--text-muted);
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar__actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.topbar__hamburger { display: none; }
+
+/* 消息滚动区 = 章节流容器（纵向滚动的全屏章节依次排开，见 app.js §7） */
+.scroller {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* 内层撑满消息区高度：HERO 与作品集两个整屏章节靠 min-height:100% 取齐 */
+.scroller__inner {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 16px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.divider::before, .divider::after { content: ""; height: 1px; background: var(--divider); flex: 1 1 auto; }
+
+.msg {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding: 2px 48px 2px 16px;
+  margin-top: 16px;
+  animation: msgIn 0.22s var(--ease-out) both;
+}
+@keyframes msgIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.msg:hover { background: var(--hover); }
+.msg--compact { margin-top: 0; padding-top: 2px; }
+
+.msg__avatar { width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; overflow: hidden; }
+.msg__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.msg__avatar--icon { display: grid; place-items: center; background: var(--brand); color: #fff; }
+
+.msg__body { min-width: 0; flex: 1 1 auto; max-width: 860px; }
+.msg__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.msg__author { font-size: 16px; font-weight: 600; color: var(--text-strong); }
+.msg__author--brand { color: var(--brand-text); }
+.msg__author--green { color: var(--green); }
+.msg__author--pink { color: var(--pink); }
+.msg__author--yellow { color: var(--yellow); }
+.msg__time { font-size: 12px; color: var(--text-muted); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: var(--brand);
+  color: #fff;
+  vertical-align: middle;
+}
+.tag--green { background: var(--green); }
+.tag--yellow { background: var(--yellow); color: #1a1a1a; }
+.tag--red { background: var(--red); }
+.tag--gray { background: var(--text-faint); }
+.tag--outline { background: transparent; border: 1px solid var(--divider); color: var(--text-muted); }
+
+.msg__text { color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg__text + .msg__text { margin-top: 4px; }
+.msg__text--muted { color: var(--text-muted); }
+.msg__text--strong { color: var(--text-strong); }
+
+.msg__reactions { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--chat-alt);
+  border: 1px solid transparent;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+html[data-theme="light"] .reaction { background: var(--sidebar); }
+.reaction:hover { border-color: var(--text-faint); }
+.reaction.is-on { background: var(--brand-soft); border-color: var(--brand); color: var(--brand-text); }
+
+/* 提及 / 行内代码 */
+.mention {
+  background: var(--mention-bg);
+  color: var(--mention-text);
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.mention:hover { background: var(--brand); color: #fff; }
+code {
+  background: var(--code-bg);
+  color: var(--code-text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.85em;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+html[data-theme="light"] code { background: #f2f3f5; }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-size: 13px;
+}
+pre code { background: none; padding: 0; font-size: 13px; line-height: 1.5; }
+
+/* ============ Embed 卡片 ============ */
+.embed {
+  --embed-accent: var(--brand);
+  position: relative;
+  margin-top: 8px;
+  background: var(--embed-bg);
+  border-radius: 4px;
+  border-left: 4px solid var(--embed-accent);
+  padding: 12px 16px 14px;
+  max-width: 640px;
+}
+.embed--wide { max-width: none; }
+.embed--plain { background: transparent; }
+.embed__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.embed__author { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.embed__author img { width: 24px; height: 24px; border-radius: 50%; }
+.embed__author span { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+.embed__desc { font-size: 14px; line-height: 1.5; color: var(--text); margin: 0; }
+.embed__desc + .embed__desc { margin-top: 8px; }
+.embed__quote {
+  border-left: 3px solid var(--embed-accent);
+  margin: 8px 0 0;
+  padding: 2px 0 2px 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.embed__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px 24px;
+  margin-top: 10px;
+}
+.field__name { font-size: 13px; font-weight: 700; color: var(--text-strong); margin-bottom: 2px; }
+.field__value { font-size: 14px; color: var(--text); line-height: 1.45; }
+.field__value--muted { color: var(--text-muted); }
+.embed__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.embed__footer img { width: 20px; height: 20px; border-radius: 50%; }
+
+/* 标签 chip */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+  background: var(--chat-alt);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+html[data-theme="light"] .chip { background: #ffffff; }
+.chip--brand { background: var(--brand-soft); color: var(--brand-text); border-color: transparent; }
+
+/* 技能条 */
+.skills { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.skill { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.skill__name {
+  width: 152px;
+  flex: 0 0 152px;
+  color: var(--text-strong);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.skill__bar { flex: 1 1 auto; display: flex; gap: 3px; }
+.skill__seg { height: 6px; flex: 1 1 0; border-radius: 2px; background: var(--hover-strong); }
+.skill__seg.is-on { background: var(--brand); }
+.skill__pct { font-size: 12px; color: var(--text-muted); width: 34px; text-align: right; flex: 0 0 34px; }
+.langdesc { margin: 2px 0 8px 162px; font-size: 13px; color: var(--text-muted); }
+
+/* 数据卡 */
+.statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 10px; margin-top: 10px; }
+.stat {
+  background: var(--chat-alt);
+  border-radius: 8px;
+  border-top: 3px solid var(--stat-accent, var(--brand));
+  padding: 10px 12px 12px;
+}
+html[data-theme="light"] .stat { background: #ffffff; box-shadow: var(--shadow-low); }
+.stat__value { font-size: 22px; font-weight: 800; color: var(--text-strong); letter-spacing: -0.01em; line-height: 1.1; }
+.stat__label { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 4px; }
+.stat__note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--brand);
+  color: #fff;
+  transition: background-color 0.12s var(--ease-out), transform 0.08s var(--ease-out);
+}
+.btn:hover { background: var(--brand-hover); text-decoration: none; }
+.btn:active { transform: translateY(1px); }
+.btn--secondary { background: var(--chat-alt); color: var(--text-strong); }
+html[data-theme="light"] .btn--secondary { background: #ffffff; border: 1px solid var(--border); }
+.btn--secondary:hover { background: var(--hover-strong); }
+.btn--ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--divider); }
+.btn--ghost:hover { background: var(--hover); color: var(--text-strong); }
+.btn--sm { height: 28px; padding: 0 12px; font-size: 13px; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* 时间线（经历） */
+.timeline { position: relative; margin-top: 10px; padding-left: 18px; }
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--divider);
+}
+.tlitem { position: relative; margin-bottom: 14px; }
+.tlitem:last-child { margin-bottom: 0; }
+.tlitem::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tl-accent, var(--brand));
+  box-shadow: 0 0 0 3px var(--embed-bg);
+}
+.tlitem__top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.tlitem__role { font-size: 14px; font-weight: 700; color: var(--text-strong); }
+.tlitem__period { font-size: 12px; color: var(--text-muted); }
+.tlitem__text { font-size: 14px; color: var(--text); margin-top: 2px; line-height: 1.5; }
+.tlitem__metric {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-text);
+  background: var(--brand-soft);
+  border-radius: 9px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+
+/* 焦点列表 */
+.focusrow { display: flex; gap: 10px; padding: 6px 0; align-items: flex-start; }
+.focusrow + .focusrow { border-top: 1px solid var(--border); }
+.focusrow__dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex: 0 0 10px; }
+.focusrow__title { font-size: 14px; font-weight: 700; color: var(--text-strong); }
+.focusrow__desc { font-size: 13px; color: var(--text-muted); }
+
+/* 成员列表（右栏） */
+.members {
+  background: var(--sidebar);
+  overflow-y: auto;
+  padding: 16px 8px 24px;
+  transition: background-color 0.18s var(--ease-out), opacity 0.42s var(--ease-out);
+}
+.members__title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 0 8px 8px;
+}
+.member { display: flex; align-items: center; gap: 10px; padding: 5px 8px; border-radius: 4px; }
+.member:hover { background: var(--hover); }
+.member__avatar { position: relative; width: 32px; height: 32px; flex: 0 0 32px; }
+.member__avatar img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.member__dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 3px solid var(--sidebar);
+}
+.member__name { font-size: 15px; font-weight: 600; color: var(--text-strong); line-height: 1.2; }
+.member__sub { font-size: 12px; color: var(--text-muted); }
+.member__role { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 14px; color: var(--text-muted); }
+.member__role .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 12px; }
+.members__sep { height: 1px; background: var(--divider); margin: 10px 8px 14px; }
+.minichip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: var(--chat-alt);
+  color: var(--text-muted);
+  margin: 0 4px 4px 0;
+}
+html[data-theme="light"] .minichip { background: #ffffff; }
+.minichip .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ============ 输入区 ============ */
+/* 输入区：--cmp-h 由 JS 在内容可见时量一次写到元素上。
+   没有它就只能用 auto —— 而 auto 无法参与插值，空间只能「一步到位」地消失，
+   那一帧就是硬跳；换成确定的 flex-basis 后，它与顶栏、列宽共用同一条
+   曲线与时长，外壳作为一个整体收放。量不到时回落到 auto（行为同旧版，不更差）。 */
+.composer {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: var(--cmp-h, auto);
+  padding: 0 16px 24px;
+  transition: flex-basis var(--t-shell) var(--ease-out),
+              padding-top var(--t-shell) var(--ease-out),
+              padding-bottom var(--t-shell) var(--ease-out),
+              opacity calc(var(--t-shell) * 0.55) var(--ease-out);
+}
+.composer__box {
+  background: var(--input);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  min-height: 44px;
+}
+html[data-theme="light"] .composer__box { background: #ebedef; }
+.composer__input {
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  padding: 11px 0;
+  outline: none;
+  min-width: 0;
+}
+.composer__input::placeholder { color: var(--text-faint); }
+.composer__icon { color: var(--text-muted); display: grid; place-items: center; flex: 0 0 auto; }
+.composer__icon--send { color: var(--brand-text); cursor: pointer; }
+.composer__hint { font-size: 12px; color: var(--text-faint); margin: 8px 2px 0; }
+.composer__hint kbd {
+  background: var(--chat-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+/* ============ 章节流（纵向滚动全屏页） ============ */
+/* 第一屏 HERO、第二屏 3D 作品集都是整屏章节（100dvh，沉浸态下 = 视口）；
+   履历章节自然高度依次排在后面。路由与装配见 app.js §7。
+   HERO 样式在 hero.css（.hero 作用域）。 */
+.story-sec { flex: 0 0 auto; }
+
+/* ------------------------------------------------------------
+   磁吸翻页（原生 scroll-snap）
+
+   snap 点 = 首屏顶 / 作品集屏顶 / 履历首章顶。前两张整屏各 100dvh，
+   about 顶因此正好落在第 2 屏处 —— 三点间距都恰好一整屏，松手必然停在
+   某一屏的顶边：一次手势翻一屏。惯性与手感完全交给浏览器原生实现，
+   不做 scroll-jacking；scroll-snap-stop: always 保证快速甩动也只前进一屏。
+
+   必须动态开关（app.js §7.2c updateSnap），两个理由：
+     · mandatory 会强制停在**最近的** snap 点。若全站常开，履历区那些
+       不等于一屏高的章节将无处停留（每次都被拽回上一屏），所以越过
+       履历首章顶就解除 snap，交还自由滚动。
+     · 程序化滚动（go / 深链）期间必须解除：snap 的终点判定与 scrollTo
+       的目标是两套独立机制，并存时会互相抢终点。
+   开关都只发生在滚动过程中（静止时位置不变则状态不变），因此不会触发
+   「改 scroll-snap-type 立即 re-snap」的跳变。
+   ------------------------------------------------------------ */
+.scroller.is-snap { scroll-snap-type: y mandatory; }
+.scroller.is-snap [data-sec="welcome"],
+.scroller.is-snap [data-sec="portfolio"],
+.scroller.is-snap [data-sec="about"] {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* ------------------------------------------------------------
+   履历章节入场（一次性淡入上浮）
+
+   about 之后的章节原本在页面加载时就把 .msg 的 msgIn 播完了，滚到时是静止的，
+   与前两屏的磁吸 / 镜头语言落差明显。这里改成「进入视口才播」：
+   app.js initSectionReveal() 给章节加 .is-in，CSS 负责动画。
+
+   两条硬约束（与 app.js 同名注释一致）：
+     · 只作用于**直接子元素** —— section 自身的 rect 不能动，否则
+       measureSections / 磁吸判定 / scroll-spy 会全盘错位；
+     · 一次性：加类后不复位，来回滚动不重播，避免满页都在动。
+   延迟按序错开、第 4 条之后不再递增，长章节不至于后半段干等。
+   ------------------------------------------------------------ */
+@keyframes secIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+.story-sec.is-in > * { animation: secIn 0.44s var(--ease-out) both; }
+.story-sec.is-in > *:nth-child(2) { animation-delay: 0.06s; }
+.story-sec.is-in > *:nth-child(3) { animation-delay: 0.12s; }
+.story-sec.is-in > *:nth-child(n + 4) { animation-delay: 0.18s; }
+
+.story-sec--portfolio {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #07070f;
+}
+/* 入场 / 过场：
+   ① 兜底档（.is-near，纯 CSS）：章节露出一角即淡入上浮；
+   ② 联动档（.is-linked，--q 由 app.js §7.2b 逐帧写入）：q = 第二屏在视口中的
+      覆盖率 0→1，面板位移与缩放跟着几何走 —— 天然覆盖 coyote-scroll 才看得见。
+      联动档必须关掉 CSS 过渡：0.75s 的尾巴会被逐帧写入的值反复打断，反而黏滞。
+   两档互斥：写 --q 即进联动档；减动效偏好 / 无 IO 环境留在兜底档。 */
+.story-portfolio__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translate3d(0, 56px, 0);
+  transition: opacity var(--t-base) var(--ease-out),
+              transform var(--t-shell) var(--ease-out);
+}
+.story-sec--portfolio.is-near .story-portfolio__frame { opacity: 1; transform: none; }
+/* 磁吸档：翻页的「落位感」由 scroll-snap 提供，这里只留一点点收敛位移，
+   幅度刻意压小（32px / 1%）—— 磁吸下手指/触控板已给出明确的终点反馈，
+   再叠大位移会显得拖沓，也让两屏交界处出现可见错位。 */
+.story-sec--portfolio.is-linked .story-portfolio__frame {
+  opacity: 1;
+  transition: none;
+  transform: translate3d(0, calc((1 - var(--q, 1)) * 32px), 0)
+             scale(calc(0.99 + 0.01 * var(--q, 1)));
+  transform-origin: 50% 0%;
+}
+.story-portfolio__frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+/* 悬浮「全屏打开」：整屏作品集里唯一常驻的宿主 UI，给独立版留个入口 */
+.story-portfolio__full {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #dfe3ff;
+  background: rgba(20, 22, 34, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background-color 0.15s var(--ease-out), color 0.15s var(--ease-out);
+}
+.story-portfolio__full:hover { background: rgba(88, 101, 242, 0.88); color: #fff; text-decoration: none; }
+/* 自动回复落点：空时不存在，有内容时出现在页面末尾 */
+.story-sec--chat:empty { display: none; }
+.story-sec--chat { padding-bottom: 40px; }
+
+/* ============ 沉浸态：首屏 / 作品集屏全屏，Discord 外壳让位 ============ */
+/* #app[data-immersive="1"]（由 app.js §7.7 写入）：
+   - 左右栏列宽收放到 0，主列（消息区）占满视口；
+   - 顶栏与输入区高度瞬时收起 / 展开、内容淡出 / 淡入——滚动补偿钉住视口，视觉零跳变；
+   - 浮动控件（主题 / 语言 / 菜单）浮现，补上被隐藏外壳的功能入口。
+   列宽收放是动画的（.app 上的 transition），自然滚动跨界时形成「外壳开合」动效；
+   导航切换则用 .is-layout-snap 瞬时完成（先布局后飞行，落点精确）。 */
+.app[data-immersive="1"] .topbar {
+  height: 0;
+  flex-basis: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  box-shadow: none;
+}
+.app[data-immersive="1"] .composer {
+  /* 注意：不写 height:0 —— auto→0 不可插值，写了它空间就会立刻塌掉，
+     flex-basis 的动画等于白做。min-height:0 用来允许收缩到内容高度以下。 */
+  flex-basis: 0;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.app[data-immersive="1"] .rail,
+.app[data-immersive="1"] .sidebar:not(.is-open),
+.app[data-immersive="1"] .members {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  overflow: hidden;
+  /* 内容比列宽早半拍淡干净（列宽还在收），收尾才关 visibility —— 否则
+     淡出会被 visibility:hidden 在半路掐断，看着就是「啪」地消失。
+     三者共用 --t-shell / --ease-out，外壳像一个整体退场。 */
+  transition: opacity calc(var(--t-shell) * 0.7) var(--ease-out),
+              transform var(--t-shell) var(--ease-out),
+              visibility 0s linear calc(var(--t-shell) * 0.7);
+}
+/* 左右两栏顺势朝各自方向滑出一小段，配合列宽收拢：不会显得被横向硬拉扁。
+   仅在外壳隐藏期间加位移（这一瞬间面板本就不可见），不影响抽屉与浮层。 */
+.app[data-immersive="1"] .rail { transform: translate3d(-20px, 0, 0); }
+.app[data-immersive="1"] .members { transform: translate3d(20px, 0, 0); }
+.rail, .members {
+  transition: opacity calc(var(--t-shell) * 0.7) var(--ease-out),
+              transform var(--t-shell) var(--ease-out);
+}
+@media (min-width: 1181px) {
+  .app[data-immersive="1"] { grid-template-columns: 0px 0px minmax(0, 1fr) 0px; }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+  .app[data-immersive="1"] { grid-template-columns: 0px 0px minmax(0, 1fr); }
+}
+@media (max-width: 860px) {
+  .app[data-immersive="1"] { grid-template-columns: 0px minmax(0, 1fr); }
+}
+
+/* 沉浸浮动控件：一簇玻璃圆钮（快速跳转 · 主题 · 语言）。
+   一律落在右下角，三种尺寸统一：右上角要留给作品集屏自己的「全屏打开」
+   入口（同为 top:14px/right:16px，放这儿会被遮住），而窄屏下作品集的
+   自带导航也在右上角。右下角在两张整屏里都是空的。 */
+.immersive-bar {
+  position: fixed;
+  right: 16px;
+  bottom: 18px;
+  z-index: 95;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  /* 出场快（0.2s，别让人等）、入场慢且有 0.08s 延迟（等外壳先退干净再浮现） */
+  transition: opacity var(--t-small) var(--ease-out),
+              transform var(--t-small) var(--ease-out),
+              visibility 0s linear var(--t-small);
+}
+.app[data-immersive="1"] .immersive-bar {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity var(--t-base) var(--ease-out) 0.08s,
+              transform var(--t-base) var(--ease-out) 0.08s,
+              visibility 0s;
+}
+.imbar__btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #e8eaf6;
+  background: rgba(16, 17, 23, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  transition: background-color var(--t-micro) var(--ease-out),
+              border-color var(--t-micro) var(--ease-out),
+              transform var(--t-micro) var(--ease-crv);
+}
+.imbar__btn:hover { background: rgba(88, 101, 242, 0.9); border-color: rgba(138, 146, 255, 0.6); transform: translateY(-2px); }
+.imbar__btn svg { width: 18px; height: 18px; }
+.imbar__lang { font-size: 12px; font-weight: 800; letter-spacing: 0.04em; }
+@media (max-width: 860px) {
+  .immersive-bar { right: 12px; }
+  .imbar__btn { width: 36px; height: 36px; }
+}
+
+/* ============ 浮层：快速切换 / 提示 ============ */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}
+.modal.is-open { display: flex; }
+.modal__panel {
+  width: min(560px, calc(100vw - 32px));
+  background: var(--elevated);
+  border-radius: 8px;
+  box-shadow: var(--shadow-high);
+  overflow: hidden;
+  animation: msgIn 0.16s var(--ease-out) both;
+}
+.modal__input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  padding: 16px;
+  outline: none;
+  border-bottom: 1px solid var(--divider);
+}
+.modal__list { max-height: 46vh; overflow-y: auto; padding: 8px; }
+.modal__group { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; padding: 8px 8px 4px; }
+.modal__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text);
+  text-align: left;
+}
+.modal__item:hover, .modal__item.is-active { background: var(--hover-strong); }
+.modal__item .k { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+.modal__empty { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translate(-50%, 20px);
+  background: #111214;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-small) var(--ease-out),
+              transform calc(var(--t-base)) var(--ease-crv);
+  z-index: 300;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+.toast.is-open { opacity: 1; transform: translate(-50%, 0); }
+/* 沉浸态下右下角有浮动控件，提示条抬高一档让开（窄屏两者会横向重叠） */
+.app[data-immersive="1"] ~ .toast { bottom: 74px; }
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-small) var(--ease-out);
+  z-index: 90;
+}
+.scrim.is-open { opacity: 1; pointer-events: auto; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------- 响应式 ---------------- */
+@media (max-width: 1180px) {
+  .app { grid-template-columns: 72px 240px minmax(0, 1fr); }
+  .members { display: none; }
+}
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: 72px minmax(0, 1fr); }
+  .rail { position: relative; z-index: 50; }
+  .sidebar {
+    position: fixed;
+    left: 72px;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    z-index: 100;
+    display: none;
+    box-shadow: var(--shadow-high);
+  }
+  .sidebar.is-open { display: flex; animation: drawerIn 0.2s var(--ease-out) both; }
+  @keyframes drawerIn {
+    from { transform: translateX(-14px); opacity: 0.5; }
+    to { transform: none; opacity: 1; }
+  }
+  .topbar__hamburger { display: grid; }
+  .msg__body { max-width: none; }
+  .embed { max-width: none; }
+}
+
+@media (max-width: 560px) {
+  .app { grid-template-columns: 60px minmax(0, 1fr); }
+  .rail { padding: 8px 0 12px; }
+  .rail__item { width: 40px; height: 40px; border-radius: 14px; }
+  .rail__pill { display: none; }
+  .sidebar { left: 60px; width: 220px; }
+  .msg { padding-right: 16px; gap: 10px; }
+  .msg__avatar { width: 32px; height: 32px; flex-basis: 32px; }
+  .topbar { padding: 0 10px; gap: 4px; }
+  .topbar__topic { display: none; }
+  .topbar__divider { display: none; }
+  .topbar__mail { display: none; }
+  .langbtn { min-width: 34px; padding: 0 8px; }
+  .skill__name { width: 92px; flex-basis: 92px; font-size: 13px; }
+  .langdesc { margin-left: 102px; }
+  .composer { padding: 0 10px 16px; }
+  .divider { margin-left: 10px; margin-right: 10px; }
+  /* 窄屏：悬浮按钮收成圆形图标，避开作品集自带的顶部导航 */
+  .story-portfolio__full { top: 10px; right: 10px; width: 32px; padding: 0; justify-content: center; }
+  .story-portfolio__full #pfFullLabel, .story-portfolio__full-arrow { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* 打印：整页 = 完整履历单页（HERO 与 3D 作品集不打印，见 hero.css） */
+@media print {
+  body { overflow: visible; background: #fff; color: #000; }
+  .app { display: block; height: auto; }
+  .rail, .sidebar, .members, .composer, .scrim, .modal, .toast, .immersive-bar { display: none !important; }
+  /* 沉浸态可能压缩媒体查询里的顶栏/输入区，打印时一律还原 */
+  .topbar, .composer { height: auto !important; opacity: 1 !important; overflow: visible !important; pointer-events: auto !important; }
+  .scroller, .scroller__inner { display: block; overflow: visible; height: auto; }
+  .msg { break-inside: avoid; }
+  .story-sec--portfolio, .story-sec--chat { display: none !important; }
+}

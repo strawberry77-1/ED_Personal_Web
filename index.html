@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>许航（Edwards）· 具身智能算法工程师 — 个人主页</title>
+<meta name="description" content="许航（Edwards）— 具身智能算法工程师。VLA 模型、视觉/触觉感知、Agentic-RAG 全栈系统。深圳，开放 AI Agent / 具身智能 / Web3 / Quant 机会。">
+<meta name="author" content="Xu Hang (Edwards)">
+<meta name="theme-color" content="#1e1f22">
+
+<!-- ========== 主题预置（防首帧闪烁） ==========
+     必须在样式表之前同步执行：若等到 body 末尾的 app.js 才切主题，偏好浅色的
+     用户会先看到一帧暗色再跳亮（本地几十毫秒不易察觉，部署到网络后会很明显）。
+     逻辑与 app.js 的 applyTheme() 同源 —— 键名 "edwards-site-theme" 与
+     ?theme= 参数两处必须同步修改。 -->
+<script>
+(function () {
+  try {
+    var q = new URLSearchParams(location.search).get("theme");
+    var mode = (q === "light" || q === "dark") ? q
+             : (localStorage.getItem("edwards-site-theme") || "system");
+    var resolved = mode === "system"
+      ? ((window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark")
+      : mode;
+    document.documentElement.setAttribute("data-theme", resolved);
+  } catch (e) {}
+})();
+</script>
+
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/avatar-128.jpg">
+<link rel="canonical" href="https://strawberry77-1.github.io/ED_Personal_Web/">
+
+<!-- ========== 分享卡片 ==========
+     og:image / og:url 必须是**绝对地址**：微信 / Slack / X 等平台只认绝对 URL，
+     相对路径会被直接忽略（分享出去就是一条光秃秃的链接）。
+     换域名时改本段与下面 twitter:* 的这几处即可（app.js setLang() 还会同步
+     og:title / og:description / og:locale）。 -->
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="Edwards_Xu ^航">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://strawberry77-1.github.io/ED_Personal_Web/">
+<meta property="og:title" content="许航（Edwards）· 具身智能算法工程师">
+<meta property="og:description" content="VLA 模型 · 视觉/触觉感知 · Agentic-RAG 全栈系统。开放 AI Agent / 具身智能 / Web3 / Quant 机会。">
+<meta property="og:image" content="https://strawberry77-1.github.io/ED_Personal_Web/assets/img/avatar.jpg">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="许航（Edwards）">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="许航（Edwards）· 具身智能算法工程师">
+<meta name="twitter:description" content="VLA 模型 · 视觉/触觉感知 · Agentic-RAG 全栈系统。开放 AI Agent / 具身智能 / Web3 / Quant 机会。">
+<meta name="twitter:image" content="https://strawberry77-1.github.io/ED_Personal_Web/assets/img/avatar.jpg">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/hero.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ========== 服务器栏 ========== -->
+  <nav class="rail" id="rail" aria-label="频道服务器栏"></nav>
+
+  <!-- ========== 频道栏 ========== -->
+  <aside class="sidebar" id="sidebar" aria-label="频道列表">
+    <div class="sidebar__header" id="sidebarHeader"></div>
+    <div class="sidebar__body" id="sidebarBody"></div>
+    <div class="userpanel" id="userpanel"></div>
+  </aside>
+
+  <!-- ========== 主内容区 ========== -->
+  <main class="main">
+    <header class="topbar">
+      <button class="iconbtn topbar__hamburger" id="hamburger" aria-label="打开频道列表"></button>
+      <span class="topbar__hash" id="topHash"></span>
+      <h1 class="topbar__title" id="topTitle">welcome</h1>
+      <span class="topbar__divider"></span>
+      <p class="topbar__topic" id="topTopic"></p>
+      <div class="topbar__actions">
+        <button class="iconbtn" id="searchBtn" aria-label="搜索"></button>
+        <a class="iconbtn topbar__mail" href="mailto:strawberry.77.111@gmail.com" aria-label="发送邮件"></a>
+        <button class="iconbtn" data-theme-toggle aria-label="切换主题"></button>
+        <button class="langbtn" id="langBtn" data-lang-toggle aria-label="切换语言">EN</button>
+      </div>
+    </header>
+
+    <div class="scroller" id="scroller">
+      <div class="scroller__inner" id="messages"></div>
+    </div>
+
+    <div class="composer">
+      <div class="composer__box">
+        <button class="composer__icon" id="composerPlus" aria-label="插入"></button>
+        <input class="composer__input" id="composerInput" type="text"
+               placeholder="给 #Edwards 发消息…（试试输入「邮箱」「岗位」「项目」后回车）"
+               aria-label="发送消息" autocomplete="off">
+        <button class="composer__icon composer__icon--send" id="composerSend" aria-label="发送"></button>
+      </div>
+      <p class="composer__hint" id="composerHint"></p>
+    </div>
+  </main>
+
+  <!-- ========== 成员栏 ========== -->
+  <aside class="members" id="members" aria-label="身份标签与技能"></aside>
+
+  <!-- ========== 沉浸态浮动控件 ==========
+       首屏 / 作品集屏全屏展示（Discord 外壳让位）时浮现：频道菜单 · 主题 · 语言。
+       按钮复用全局委托（data-theme-toggle / data-lang-toggle / data-menu-toggle），
+       显隐由 #app[data-immersive] 驱动，见 app.js §7.7 与 style.css「沉浸态」。 -->
+  <div class="immersive-bar" id="immersiveBar">
+    <!-- 快速跳转（⌘K）：沉浸态下侧栏列宽为 0、抽屉在桌面端无处展开，
+         频道列表改由浮层提供，三种尺寸行为一致 -->
+    <button class="imbar__btn imbar__menu" type="button" data-quicksearch aria-label="快速跳转（⌘K）" title="快速跳转（⌘K）"></button>
+    <button class="imbar__btn" type="button" data-theme-toggle aria-label="切换主题"></button>
+    <button class="imbar__btn imbar__lang" id="immersiveLang" type="button" data-lang-toggle aria-label="切换语言">EN</button>
+  </div>
+</div>
+
+<!-- ========== 快速切换浮层 ========== -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="快速跳转">
+  <div class="modal__panel">
+    <input class="modal__input" id="searchInput" type="text"
+           placeholder="搜索频道、经历、项目、技能或指令…" autocomplete="off">
+    <div class="modal__list" id="searchList"></div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/hero.js"></script>
+</body>
+</html>
